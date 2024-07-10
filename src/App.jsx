@@ -1,5 +1,9 @@
 import React, { useState } from 'react';
 import { Calendar, ChevronLeft, ChevronRight, Award, TrendingUp, Sticker, Palette, X, Info } from 'lucide-react';
+import FullCalendar from '@fullcalendar/react';
+import dayGridPlugin from '@fullcalendar/daygrid';
+import interactionPlugin from '@fullcalendar/interaction';
+
 
 const tiers = [
   { name: 'Bronze', color: 'text-orange-600', bgColor: 'bg-orange-600', minLevel: 1, reward: '1 free sticker' },
@@ -94,8 +98,10 @@ function App() {
               </div>
             </div>
             <div className="flex items-center justify-center h-64 bg-gray-100 rounded-md">
-              <Calendar className="h-16 w-16 text-gray-400" />
-              <span className="ml-2 text-gray-500">Calendar {view} view goes here</span>
+            <FullCalendar
+              plugins={[dayGridPlugin, interactionPlugin]}
+              initialView='dayGridMonth'
+            />
             </div>
           </div>
         </div>
