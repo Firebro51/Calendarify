@@ -50,23 +50,29 @@ function App() {
   const changeView = (newView) => {
     if (calendarRef.current) {
       const calendarApi = calendarRef.current.getApi();
+      let viewDisplayName = ''; // Variable to hold the user-friendly name
       switch(newView) {
         case 'year':
           calendarApi.changeView('dayGridYear');
+          viewDisplayName = 'Year'; // Set display name for year view
           break;
         case 'month':
           calendarApi.changeView('dayGridMonth');
+          viewDisplayName = 'Month'; // Set display name for month view
           break;
         case 'week':
           calendarApi.changeView('timeGridWeek');
+          viewDisplayName = 'Week'; // Set display name for week view
           break;
         case 'day':
           calendarApi.changeView('timeGridDay');
+          viewDisplayName = 'Day'; // Set display name for day view
           break;
         default:
           calendarApi.changeView('dayGridMonth');
+          viewDisplayName = 'Month'; // Default to month view
       }
-      setView(calendarApi.view.type);
+      setView(viewDisplayName); // Use the friendly name instead of the internal view type
     }
   };
 
@@ -150,8 +156,10 @@ function App() {
               headerToolbar={false}
               dayMaxEvents={3}
               allDaySlot={false}
+              nowIndicator={true}
               eventContent={renderEventContent}
               dayCellClassNames="hover:bg-gray-200 transition-colors duration-200"
+              slotMinTime={'07:00:00'}
             />
             </div>
           </div>
