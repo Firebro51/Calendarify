@@ -3,6 +3,8 @@ import { Calendar, ChevronLeft, ChevronRight, Award, TrendingUp, Sticker, Palett
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
+import timeGridPlugin from '@fullcalendar/timegrid';
+import listPlugin from '@fullcalendar/list';
 
 
 const tiers = [
@@ -33,7 +35,7 @@ const stickers = [
 ];
 
 function App() {
-  const [view, setView] = useState('month');
+  const [view, setView] = useState('dayGridMonth');
   const [level, setLevel] = useState(15);
   const [daysUsed, setDaysUsed] = useState(37);
   const [achievementsCount, setAchievementsCount] = useState(3);
@@ -43,7 +45,22 @@ function App() {
   const [showTierInfo, setShowTierInfo] = useState(false);
 
   const toggleView = (newView) => {
-    setView(newView);
+    switch(newView) {
+      case 'year':
+        setView('dayGridYear');
+        break;
+      case 'month':
+        setView('dayGridMonth');
+        break;
+      case 'week':
+        setView('dayGridWeek');
+        break;
+      case 'day':
+        setView('dayGridDay');
+        break;
+      default:
+        setView('dayGridMonth');
+    }
   };
 
   const calculateLevelProgress = () => {
@@ -90,18 +107,23 @@ function App() {
           <div className="bg-white shadow rounded-lg p-4">
             <div className="flex justify-between items-center mb-2">
               <h2 className="text-lg font-semibold">
-                {view.charAt(0).toUpperCase() + view.slice(1)} View
+                {view.replace('dayGrid', '')} View
               </h2>
               <div className="flex items-center space-x-2">
                 <button className="p-1"><ChevronLeft /></button>
                 <button className="p-1"><ChevronRight /></button>
               </div>
             </div>
-            <div className="flex items-center justify-center h-64 bg-gray-100 rounded-md">
+            <div className="h-64 bg-gray-100 rounded-md overflow-hidden">
             <FullCalendar
-              plugins={[dayGridPlugin, interactionPlugin]}
-              initialView='dayGridMonth'
-            />
+                plugins={[dayGridPlugin, interactionPlugin]}
+                initialView={view}
+                height="100%"
+                headerToolbar={false}
+                dayMaxEvents={2}
+                eventContent={renderEventContent}
+                dayCellClassNames="hover:bg-gray-200 transition-colors duration-200"
+              />
             </div>
           </div>
         </div>
@@ -146,7 +168,7 @@ function App() {
       </div>
 
       {showAchievements && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-4 rounded-lg max-w-md w-full">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold">Achievements</h2>
@@ -168,7 +190,7 @@ function App() {
       )}
 
       {showStickers && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-4 rounded-lg max-w-md w-full">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold">Stickers</h2>
@@ -211,6 +233,14 @@ function App() {
       )}
     </div>
   );
+}
+
+function renderEventContent(eventInfo) {
+  return (
+    <div className="text-xs p-1 bg-gray-200 rounded truncate">
+      {eventInfo.event.title}
+    </div>
+  )
 }
 
 export default App;

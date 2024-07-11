@@ -1,3 +1,38 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* FullCalendar Tailwind Styles */
+@layer components {
+    .fc {
+      @apply font-sans text-sm;
+    }
+  
+    .fc .fc-daygrid-day-top {
+      @apply flex-col;
+    }
+  
+    .fc .fc-daygrid-day-number {
+      @apply text-gray-700 p-1;
+    }
+  
+    .fc .fc-col-header-cell-cushion {
+      @apply font-semibold text-gray-700 py-2;
+    }
+  
+    .fc .fc-daygrid-day.fc-day-today {
+      @apply bg-blue-50;
+    }
+  
+    .fc .fc-daygrid-day.fc-day-today .fc-daygrid-day-number {
+      @apply bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center;
+    }
+  
+    .fc .fc-daygrid-event {
+      @apply text-xs py-1 px-2 rounded bg-gray-200 text-gray-700 border-none;
+    }
+  
+    .fc .fc-daygrid-more-link {
+      @apply text-xs text-blue-500;
+    }
+  }
