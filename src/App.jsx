@@ -98,7 +98,7 @@ function App() {
   };
 
   return (
-    <div className="p-4 max-w-4xl mx-auto">
+    <div className="p-4 max-w-7xl mx-auto h-screen flex flex-col">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">My Calendar</h1>
         <div className="flex gap-2">
@@ -123,9 +123,9 @@ function App() {
       ))}
     </div>
       
-      <div className="flex gap-4">
-        <div className="flex-grow">
-          <div className="bg-white shadow rounded-lg p-4">
+      <div className="flex gap-4 flex-grow">
+        <div className="flex-grow w-2/3">
+          <div className="bg-white shadow rounded-lg p-4 h-full flex flex-col">
             <div className="flex justify-between items-center mb-2">
               <h2 className="text-lg font-semibold">
                 {view.replace('dayGrid', '')} View
@@ -135,7 +135,7 @@ function App() {
                 <button className="p-1" onClick={handleNext}><ChevronRight /></button>
               </div>
             </div>
-            <div className="h-64 bg-gray-100 rounded-md overflow-hidden">
+            <div className="flex-grow bg-gray-100 rounded-md overflow-hidden">
             <FullCalendar
               ref={calendarRef}
               plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
@@ -148,7 +148,8 @@ function App() {
               }}
               height="100%"
               headerToolbar={false}
-              dayMaxEvents={2}
+              dayMaxEvents={3}
+              allDaySlot={false}
               eventContent={renderEventContent}
               dayCellClassNames="hover:bg-gray-200 transition-colors duration-200"
             />
@@ -156,8 +157,8 @@ function App() {
           </div>
         </div>
         
-        <div className="w-64">
-          <div className="bg-white shadow rounded-lg p-4 mb-4">
+        <div className="w-1/3 flex flex-col gap-4">
+          <div className="bg-white shadow rounded-lg p-4 flex-grow">
             <h2 className="text-lg font-semibold mb-2">User Progress</h2>
             <div className="flex items-center mb-2">
               <TrendingUp className="mr-2 h-4 w-4" />
@@ -237,7 +238,7 @@ function App() {
       )}
 
       {showTierInfo && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-4 rounded-lg max-w-md w-full">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold">Tier Information</h2>
