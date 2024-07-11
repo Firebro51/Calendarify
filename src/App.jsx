@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Calendar, ChevronLeft, ChevronRight, Award, TrendingUp, Sticker, Palette, X, Info } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Award, TrendingUp, Sticker, Palette, X, Info } from 'lucide-react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
