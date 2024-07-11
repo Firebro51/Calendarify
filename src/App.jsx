@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Calendar, ChevronLeft, ChevronRight, Award, TrendingUp, Sticker, Palette, X, Info } from 'lucide-react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
@@ -34,7 +34,10 @@ const stickers = [
   { id: 8, name: 'Robot', icon: '🤖' },
 ];
 
+
+
 function App() {
+  const calendarRef = useRef(null);
   const [view, setView] = useState('dayGridMonth');
   const [level, setLevel] = useState(15);
   const [daysUsed, setDaysUsed] = useState(37);
@@ -44,22 +47,40 @@ function App() {
   const [showStickers, setShowStickers] = useState(false);
   const [showTierInfo, setShowTierInfo] = useState(false);
 
-  const toggleView = (newView) => {
-    switch(newView) {
-      case 'year':
-        setView('dayGridYear');
-        break;
-      case 'month':
-        setView('dayGridMonth');
-        break;
-      case 'week':
-        setView('dayGridWeek');
-        break;
-      case 'day':
-        setView('dayGridDay');
-        break;
-      default:
-        setView('dayGridMonth');
+  const changeView = (newView) => {
+    if (calendarRef.current) {
+      const calendarApi = calendarRef.current.getApi();
+      switch(newView) {
+        case 'year':
+          calendarApi.changeView('dayGridYear');
+          break;
+        case 'month':
+          calendarApi.changeView('dayGridMonth');
+          break;
+        case 'week':
+          calendarApi.changeView('timeGridWeek');
+          break;
+        case 'day':
+          calendarApi.changeView('timeGridDay');
+          break;
+        default:
+          calendarApi.changeView('dayGridMonth');
+      }
+      setView(calendarApi.view.type);
+    }
+  };
+
+  const handlePrev = () => {
+    if (calendarRef.current) {
+      const calendarApi = calendarRef.current.getApi();
+      calendarApi.prev();
+    }
+  };
+  
+  const handleNext = () => {
+    if (calendarRef.current) {
+      const calendarApi = calendarRef.current.getApi();
+      calendarApi.next();
     }
   };
 
@@ -91,16 +112,16 @@ function App() {
       </div>
       
       <div className="flex gap-4 mb-4">
-        {['year', 'month', 'week', 'day'].map((v) => (
-          <button
-            key={v}
-            onClick={() => toggleView(v)}
-            className={`px-4 py-2 rounded ${view === v ? 'bg-gray-300 text-black' : 'bg-gray-200 text-black hover:bg-gray-300'}`}
-          >
-            {v.charAt(0).toUpperCase() + v.slice(1)}
-          </button>
-        ))}
-      </div>
+      {['year', 'month', 'week', 'day'].map((v) => (
+        <button
+          key={v}
+          onClick={() => changeView(v)}
+          className={`px-4 py-2 rounded ${view.toLowerCase().includes(v) ? 'bg-gray-300 text-black' : 'bg-gray-200 text-black hover:bg-gray-300'}`}
+        >
+          {v.charAt(0).toUpperCase() + v.slice(1)}
+        </button>
+      ))}
+    </div>
       
       <div className="flex gap-4">
         <div className="flex-grow">
@@ -110,20 +131,27 @@ function App() {
                 {view.replace('dayGrid', '')} View
               </h2>
               <div className="flex items-center space-x-2">
-                <button className="p-1"><ChevronLeft /></button>
-                <button className="p-1"><ChevronRight /></button>
+                <button className="p-1" onClick={handlePrev}><ChevronLeft /></button>
+                <button className="p-1" onClick={handleNext}><ChevronRight /></button>
               </div>
             </div>
             <div className="h-64 bg-gray-100 rounded-md overflow-hidden">
             <FullCalendar
-                plugins={[dayGridPlugin, interactionPlugin]}
-                initialView={view}
-                height="100%"
-                headerToolbar={false}
-                dayMaxEvents={2}
-                eventContent={renderEventContent}
-                dayCellClassNames="hover:bg-gray-200 transition-colors duration-200"
-              />
+              ref={calendarRef}
+              plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
+              initialView={view}
+              views={{
+                dayGridMonth: { buttonText: 'month' },
+                timeGridWeek: { buttonText: 'week' },
+                timeGridDay: { buttonText: 'day' },
+                dayGridYear: { buttonText: 'year', duration: { years: 1 } }
+              }}
+              height="100%"
+              headerToolbar={false}
+              dayMaxEvents={2}
+              eventContent={renderEventContent}
+              dayCellClassNames="hover:bg-gray-200 transition-colors duration-200"
+            />
             </div>
           </div>
         </div>
