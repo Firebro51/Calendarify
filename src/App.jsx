@@ -183,7 +183,11 @@ function App() {
                 <Palette className="mr-2 h-4 w-4" />
                 <div className={`text-sm font-medium ${getCurrentTier().color}`}>{getCurrentTier().name} Tier</div>
               </div>
-              <button onClick={() => setShowTierInfo(true)} className="text-blue-500 hover:text-blue-600">
+              <button 
+                onClick={() => setShowTierInfo(true)} 
+                className="text-blue-500 hover:text-blue-600"
+                title="View tier information and rewards"
+              >
                 <Info className="h-4 w-4" />
               </button>
             </div>
