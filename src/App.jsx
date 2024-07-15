@@ -191,7 +191,7 @@ function App() {
                 <Info className="h-4 w-4" />
               </button>
             </div>
-            <div className="text-sm font-medium">Days used: {daysUsed}</div>
+            <div className="text-sm font-medium">DaysUsed: {daysUsed}</div>
             <div className="text-sm font-medium">Achievements: {achievementsCount}</div>
             <div className="text-sm font-medium">Stickers: {stickersCount}</div>
           </div>
