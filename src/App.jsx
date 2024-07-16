@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect  } from 'react';
-import { ChevronLeft, ChevronRight, Award, TrendingUp, Sticker, Palette, X, Info } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Award, TrendingUp, Sticker, Palette, X, Info, Moon, Sun } from 'lucide-react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
@@ -70,6 +70,7 @@ function App() {
   const [showEventModal, setShowEventModal] = useState(false);
   const [currentEvent, setCurrentEvent] = useState({ id: '', title: '', start: '', end: '', color: eventColors[0].value });
   const [isEditMode, setIsEditMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
 
   const changeView = (newView) => {
     if (calendarRef.current) {
@@ -214,15 +215,30 @@ function App() {
     setIsEditMode(false);
   };
 
+  const toggleDarkMode = () => {
+    setDarkMode(!darkMode);
+  };
+
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [darkMode]);
+
   return (
-    <div className="p-4 max-w-7xl mx-auto h-screen flex flex-col">
+    <div className="p-4 max-w-7xl mx-auto h-screen flex flex-col dark:bg-gray-800 dark:text-white">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">Calendarify</h1>
         <div className="flex gap-2">
-          <button className="px-4 py-2 bg-gray-200 text-black rounded hover:bg-gray-300" onClick={() => setShowAchievements(true)}>
+          <button className="px-4 py-2 bg-gray-200 text-black rounded hover:bg-gray-300 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600" onClick={toggleDarkMode}>
+            {darkMode ? <Sun className="inline-block" /> : <Moon className="inline-block" />}
+          </button>
+          <button className="px-4 py-2 bg-gray-200 text-black rounded hover:bg-gray-300 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600" onClick={() => setShowAchievements(true)}>
             <Award className="inline-block mr-2" /> Achievements
           </button>
-          <button className="px-4 py-2 bg-gray-200 text-black rounded hover:bg-gray-300" onClick={() => setShowStickers(true)}>
+          <button className="px-4 py-2 bg-gray-200 text-black rounded hover:bg-gray-300 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600" onClick={() => setShowStickers(true)}>
             <Sticker className="inline-block mr-2" /> Stickers
           </button>
         </div>
@@ -233,16 +249,20 @@ function App() {
         <button
           key={v}
           onClick={() => changeView(v)}
-          className={`px-4 py-2 rounded ${view.toLowerCase().includes(v) ? 'bg-gray-300 text-black' : 'bg-gray-200 text-black hover:bg-gray-300'}`}
+          className={`px-4 py-2 rounded ${
+            view.toLowerCase().includes(v) 
+              ? 'bg-gray-300 text-black dark:bg-gray-600 dark:text-white' 
+              : 'bg-gray-200 text-black hover:bg-gray-300 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600'
+          }`}
         >
           {v.charAt(0).toUpperCase() + v.slice(1)}
         </button>
       ))}
     </div>
       
-      <div className="flex gap-4 flex-grow">
+    <div className="flex gap-4 flex-grow">
         <div className="flex-grow w-2/3">
-          <div className="bg-white shadow rounded-lg p-4 h-full flex flex-col">
+          <div className="bg-white shadow rounded-lg p-4 h-full flex flex-col dark:bg-gray-700">
             <div className="flex justify-between items-center mb-2">
               <h2 className="text-lg font-semibold">
                 {view.replace('dayGrid', '')} View
@@ -252,7 +272,7 @@ function App() {
                 <button className="p-1" onClick={handleNext}><ChevronRight /></button>
               </div>
             </div>
-            <div className="flex-grow bg-gray-100 rounded-md overflow-hidden">
+            <div className="flex-grow bg-gray-100 rounded-md overflow-hidden dark:bg-gray-600">
             <FullCalendar
               ref={calendarRef}
               plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
@@ -269,7 +289,7 @@ function App() {
               allDaySlot={false}
               nowIndicator={true}
               eventContent={renderEventContent}
-              dayCellClassNames="hover:bg-gray-200 transition-colors duration-200"
+              dayCellClassNames={`hover:bg-gray-200 transition-colors duration-200 ${darkMode ? 'dark:hover:bg-gray-500' : ''}`}
               slotMinTime={'00:00:00'}
               slotMaxTime={'24:00:00'}
               scrollTime={currentTime}
@@ -280,22 +300,23 @@ function App() {
               eventClick={handleEventClick}
               eventDrop={handleEventDrop}
               eventResize={handleEventResize}
+              
             />
             </div>
           </div>
         </div>
         
         <div className="w-1/3 flex flex-col gap-4">
-          <div className="bg-white shadow rounded-lg p-4 flex-grow">
+          <div className="bg-white shadow rounded-lg p-4 flex-grow dark:bg-gray-700">
             <h2 className="text-lg font-semibold mb-2">User Progress</h2>
             <div className="flex items-center mb-2">
               <TrendingUp className="mr-2 h-4 w-4" />
               <div className="text-2xl font-bold">Level {level}</div>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-2.5 mb-2">
+            <div className="w-full bg-gray-200 rounded-full h-2.5 mb-2 dark:bg-gray-600">
               <div className={`h-2.5 rounded-full ${getCurrentTier().bgColor}`} style={{width: `${calculateLevelProgress()}%`}}></div>
             </div>
-            <p className="text-xs text-gray-500 mb-4">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
               {10 - (daysUsed % 10)} days until next level
             </p>
             <div className="flex items-center justify-between mb-2">
@@ -305,7 +326,7 @@ function App() {
               </div>
               <button 
                 onClick={() => setShowTierInfo(true)} 
-                className="text-blue-500 hover:text-blue-600"
+                cclassName="text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300"
                 title="View tier information and rewards"
               >
                 <Info className="h-4 w-4" />
@@ -316,10 +337,10 @@ function App() {
             <div className="text-sm font-medium">Stickers: {stickersCount}</div>
           </div>
           
-          <div className="bg-white shadow rounded-lg p-4">
+          <div className="bg-white shadow rounded-lg p-4 dark:bg-gray-700">
             <h2 className="text-lg font-semibold mb-2">Monthly Stats</h2>
             <div className="text-2xl font-bold">75%</div>
-            <p className="text-xs text-gray-500">Tasks completed this month</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Tasks completed this month</p>
             <div className="mt-4">
               <div className="text-sm font-medium">Current streak: 5 days</div>
               <div className="text-sm font-medium">Longest streak: 12 days</div>
@@ -330,18 +351,18 @@ function App() {
 
       {showAchievements && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-4 rounded-lg max-w-md w-full">
+          <div className="bg-white p-4 rounded-lg max-w-md w-full dark:bg-gray-700">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold">Achievements</h2>
-              <button onClick={() => setShowAchievements(false)}><X /></button>
+              <h2 className="text-xl font-bold dark:text-white">Achievements</h2>
+              <button onClick={() => setShowAchievements(false)} className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"><X /></button>
             </div>
             <div className="space-y-4">
               {achievements.map((achievement) => (
-                <div key={achievement.id} className="bg-gray-100 p-4 rounded-lg flex items-center">
+                <div key={achievement.id} className="bg-gray-100 p-4 rounded-lg flex items-center dark:bg-gray-600">
                   <div className="text-3xl mr-4">{achievement.icon}</div>
                   <div>
-                    <h3 className="font-bold">{achievement.name}</h3>
-                    <p className="text-sm text-gray-500">{achievement.description}</p>
+                    <h3 className="font-bold dark:text-white">{achievement.name}</h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-300">{achievement.description}</p>
                   </div>
                 </div>
               ))}
@@ -352,16 +373,16 @@ function App() {
 
       {showStickers && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-4 rounded-lg max-w-md w-full">
+          <div className="bg-white p-4 rounded-lg max-w-md w-full dark:bg-gray-700">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold">Stickers</h2>
-              <button onClick={() => setShowStickers(false)}><X /></button>
+              <h2 className="text-xl font-bold dark:text-white">Stickers</h2>
+              <button onClick={() => setShowStickers(false)} className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"><X /></button>
             </div>
             <div className="grid grid-cols-4 gap-4">
               {stickers.map((sticker) => (
-                <div key={sticker.id} className="bg-gray-100 p-4 rounded-lg flex flex-col items-center justify-center">
+                <div key={sticker.id} className="bg-gray-100 p-4 rounded-lg flex flex-col items-center justify-center dark:bg-gray-600">
                   <div className="text-4xl mb-2">{sticker.icon}</div>
-                  <div className="text-sm font-medium">{sticker.name}</div>
+                  <div className="text-sm font-medium dark:text-white">{sticker.name}</div>
                 </div>
               ))}
             </div>
@@ -371,21 +392,25 @@ function App() {
 
       {showTierInfo && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-4 rounded-lg max-w-md w-full">
+          <div className="bg-white p-4 rounded-lg max-w-md w-full dark:bg-gray-700">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold">Tier Information</h2>
-              <button onClick={() => setShowTierInfo(false)}><X /></button>
+              <h2 className="text-xl font-bold dark:text-white">Tier Information</h2>
+              <button onClick={() => setShowTierInfo(false)} className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"><X /></button>
             </div>
             <div className="space-y-4">
               {tiers.map((tier, index) => (
-                <div key={tier.name} className={`p-4 rounded-lg flex items-center justify-between ${tier.name === getCurrentTier().name ? 'bg-green-100' : 'bg-gray-100'}`}>
+                <div key={tier.name} className={`p-4 rounded-lg flex items-center justify-between ${
+                  tier.name === getCurrentTier().name 
+                    ? 'bg-green-100 dark:bg-green-800' 
+                    : 'bg-gray-100 dark:bg-gray-600'
+                }`}>
                   <div>
                     <h3 className={`font-bold ${tier.color}`}>{tier.name}</h3>
-                    <p className="text-sm text-gray-500">Min Level: {tier.minLevel}</p>
-                    <p className="text-sm text-gray-500">Reward: {tier.reward}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-300">Min Level: {tier.minLevel}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-300">Reward: {tier.reward}</p>
                   </div>
-                  {tier.name === getCurrentTier().name && <span className="text-green-500">Current</span>}
-                  {index === tiers.findIndex(t => t.name === getCurrentTier().name) + 1 && <span className="text-blue-500">Next</span>}
+                  {tier.name === getCurrentTier().name && <span className="text-green-500 dark:text-green-300">Current</span>}
+                  {index === tiers.findIndex(t => t.name === getCurrentTier().name) + 1 && <span className="text-blue-500 dark:text-blue-300">Next</span>}
                 </div>
               ))}
             </div>
@@ -393,23 +418,23 @@ function App() {
         </div>
       )}
 
-{showEventModal && (
+      {showEventModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-4 rounded-lg max-w-md w-full">
-            <h2 className="text-xl font-bold mb-4">{isEditMode ? 'Edit Event' : 'Add New Event'}</h2>
+          <div className="bg-white p-4 rounded-lg max-w-md w-full dark:bg-gray-700">
+            <h2 className="text-xl font-bold mb-4 dark:text-white">{isEditMode ? 'Edit Event' : 'Add New Event'}</h2>
             <input
               type="text"
               placeholder="Event Title"
               value={currentEvent.title}
               onChange={(e) => setCurrentEvent({...currentEvent, title: e.target.value})}
-              className="w-full p-2 mb-4 border rounded"
+              className="w-full p-2 mb-4 border rounded dark:bg-gray-600 dark:text-white dark:border-gray-500"
             />
             <div className="grid grid-cols-8 gap-2 mb-4">
               {eventColors.map(color => (
                 <button
                   key={color.name}
                   onClick={() => setCurrentEvent({...currentEvent, color: color.value})}
-                  className={`w-6 h-6 rounded-full ${currentEvent.color === color.value ? 'ring-2 ring-offset-2 ring-black' : ''}`}
+                  className={`w-6 h-6 rounded-full ${currentEvent.color === color.value ? 'ring-2 ring-offset-2 ring-black dark:ring-white' : ''}`}
                   style={{backgroundColor: color.value}}
                   title={color.name}
                 ></button>
@@ -426,7 +451,7 @@ function App() {
               )}
               <button 
                 onClick={() => setShowEventModal(false)}
-                className="px-4 py-2 bg-gray-200 text-black rounded hover:bg-gray-300 mr-2"
+                className="px-4 py-2 bg-gray-200 text-black rounded hover:bg-gray-300 mr-2 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500"
               >
                 Cancel
               </button>
@@ -446,7 +471,7 @@ function App() {
 
 function renderEventContent(eventInfo) {
   return (
-    <div className="text-xs p-1 bg-gray-200 rounded truncate">
+    <div className="w-full h-full p-1 text-gray-800 dark:text-white" style={{backgroundColor: eventInfo.event.backgroundColor}}>
       {eventInfo.event.title}
     </div>
   )
