@@ -34,6 +34,25 @@ const stickers = [
   { id: 8, name: 'Robot', icon: '🤖' },
 ];
 
+const eventColors = [
+  { name: 'Pastel Blue', value: '#A7C7E7' },
+  { name: 'Pastel Green', value: '#C1E1C1' },
+  { name: 'Pastel Pink', value: '#FFB3BA' },
+  { name: 'Pastel Yellow', value: '#FDFD96' },
+  { name: 'Pastel Lavender', value: '#E6E6FA' },
+  { name: 'Pastel Peach', value: '#FFDAB9' },
+  { name: 'Pastel Mint', value: '#98FF98' },
+  { name: 'Pastel Coral', value: '#FFB7B2' },
+  { name: 'Pastel Lilac', value: '#C8A2C8' },
+  { name: 'Pastel Lemon', value: '#FFFACD' },
+  { name: 'Pastel Periwinkle', value: '#CCCCFF' },
+  { name: 'Pastel Apricot', value: '#FFE5B4' },
+  { name: 'Pastel Aqua', value: '#E0FFFF' },
+  { name: 'Pastel Mauve', value: '#D8BFD8' },
+  { name: 'Pastel Sky Blue', value: '#87CEEB' },
+  { name: 'Pastel Rose', value: '#FFE4E1' },
+];
+
 
 
 function App() {
@@ -47,6 +66,10 @@ function App() {
   const [showStickers, setShowStickers] = useState(false);
   const [showTierInfo, setShowTierInfo] = useState(false);
   const [currentTime, setCurrentTime] = useState(getCurrentTime());
+  const [events, setEvents] = useState([]);
+  const [showEventModal, setShowEventModal] = useState(false);
+  const [currentEvent, setCurrentEvent] = useState({ id: '', title: '', start: '', end: '', color: eventColors[0].value });
+  const [isEditMode, setIsEditMode] = useState(false);
 
   const changeView = (newView) => {
     if (calendarRef.current) {
@@ -118,6 +141,79 @@ function App() {
     return () => clearInterval(timer);
   }, []);
 
+  const handleDateSelect = (selectInfo) => {
+    const id = Date.now().toString(); // Convert to string for consistency
+    setCurrentEvent({
+      id: id,
+      title: '',
+      start: selectInfo.startStr,
+      end: selectInfo.endStr,
+      color: eventColors[0].value
+    });
+    setIsEditMode(false);
+    setShowEventModal(true);
+  };
+
+  const handleEventAdd = () => {
+    if (currentEvent.title) {
+      if (isEditMode) {
+        setEvents(events.map(event => 
+          event.id === currentEvent.id ? currentEvent : event
+        ));
+      } else {
+        setEvents([...events, currentEvent]);
+      }
+      setShowEventModal(false);
+      setCurrentEvent({ id: '', title: '', start: '', end: '', color: eventColors[0].value });
+      setIsEditMode(false);
+    }
+  };
+
+  const handleEventClick = (clickInfo) => {
+    setCurrentEvent({
+      id: clickInfo.event.id,
+      title: clickInfo.event.title,
+      start: clickInfo.event.startStr,
+      end: clickInfo.event.endStr,
+      color: clickInfo.event.backgroundColor
+    });
+    setIsEditMode(true);
+    setShowEventModal(true);
+  };
+
+  const handleEventDrop = (dropInfo) => {
+    const updatedEvent = {
+      id: dropInfo.event.id,
+      title: dropInfo.event.title,
+      start: dropInfo.event.startStr,
+      end: dropInfo.event.endStr,
+      color: dropInfo.event.backgroundColor,
+    };
+    setEvents(events.map(event => 
+      event.id === updatedEvent.id ? updatedEvent : event
+    ));
+  };
+
+  const handleEventResize = (resizeInfo) => {
+    const updatedEvent = {
+      id: resizeInfo.event.id,
+      title: resizeInfo.event.title,
+      start: resizeInfo.event.startStr,
+      end: resizeInfo.event.endStr,
+      color: resizeInfo.event.backgroundColor,
+    };
+    setEvents(events.map(event => 
+      event.id === updatedEvent.id ? updatedEvent : event
+    ));
+  };
+
+  const handleEventDelete = () => {
+    setEvents(events.filter(event => event.id !== currentEvent.id));
+    setShowEventModal(false);
+    setCurrentEvent({ id: '', title: '', start: '', end: '', color: eventColors[0].value });
+    setIsEditMode(false);
+  };
+
   return (
     <div className="p-4 max-w-7xl mx-auto h-screen flex flex-col">
       <div className="flex justify-between items-center mb-4">
@@ -177,6 +273,13 @@ function App() {
               slotMinTime={'00:00:00'}
               slotMaxTime={'24:00:00'}
               scrollTime={currentTime}
+              editable={true}
+              selectable={true}
+              select={handleDateSelect}
+              events={events}
+              eventClick={handleEventClick}
+              eventDrop={handleEventDrop}
+              eventResize={handleEventResize}
             />
             </div>
           </div>
@@ -285,6 +388,54 @@ function App() {
                   {index === tiers.findIndex(t => t.name === getCurrentTier().name) + 1 && <span className="text-blue-500">Next</span>}
                 </div>
               ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+{showEventModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-4 rounded-lg max-w-md w-full">
+            <h2 className="text-xl font-bold mb-4">{isEditMode ? 'Edit Event' : 'Add New Event'}</h2>
+            <input
+              type="text"
+              placeholder="Event Title"
+              value={currentEvent.title}
+              onChange={(e) => setCurrentEvent({...currentEvent, title: e.target.value})}
+              className="w-full p-2 mb-4 border rounded"
+            />
+            <div className="grid grid-cols-8 gap-2 mb-4">
+              {eventColors.map(color => (
+                <button
+                  key={color.name}
+                  onClick={() => setCurrentEvent({...currentEvent, color: color.value})}
+                  className={`w-6 h-6 rounded-full ${currentEvent.color === color.value ? 'ring-2 ring-offset-2 ring-black' : ''}`}
+                  style={{backgroundColor: color.value}}
+                  title={color.name}
+                ></button>
+              ))}
+            </div>
+            <div className="flex justify-end">
+              {isEditMode && (
+                <button 
+                  onClick={handleEventDelete}
+                  className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 mr-2"
+                >
+                  Delete
+                </button>
+              )}
+              <button 
+                onClick={() => setShowEventModal(false)}
+                className="px-4 py-2 bg-gray-200 text-black rounded hover:bg-gray-300 mr-2"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handleEventAdd}
+                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+              >
+                {isEditMode ? 'Update Event' : 'Add Event'}
+              </button>
             </div>
           </div>
         </div>
