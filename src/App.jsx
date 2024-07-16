@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect  } from 'react';
 import { ChevronLeft, ChevronRight, Award, TrendingUp, Sticker, Palette, X, Info } from 'lucide-react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
@@ -46,6 +46,7 @@ function App() {
   const [showAchievements, setShowAchievements] = useState(false);
   const [showStickers, setShowStickers] = useState(false);
   const [showTierInfo, setShowTierInfo] = useState(false);
+  const [currentTime, setCurrentTime] = useState(getCurrentTime());
 
   const changeView = (newView) => {
     if (calendarRef.current) {
@@ -103,6 +104,20 @@ function App() {
     return tiers[currentTierIndex + 1] || null;
   };
 
+  function getCurrentTime() {
+    const now = new Date();
+    now.setMinutes(0, 0, 0); // Set minutes and seconds to 0
+    return now.toTimeString().split(' ')[0];
+  }
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(getCurrentTime());
+    }, 60000); // Update every minute, but it will only change on the hour
+
+    return () => clearInterval(timer);
+  }, []);
+
   return (
     <div className="p-4 max-w-7xl mx-auto h-screen flex flex-col">
       <div className="flex justify-between items-center mb-4">
@@ -159,7 +174,9 @@ function App() {
               nowIndicator={true}
               eventContent={renderEventContent}
               dayCellClassNames="hover:bg-gray-200 transition-colors duration-200"
-              slotMinTime={'07:00:00'}
+              slotMinTime={'00:00:00'}
+              slotMaxTime={'24:00:00'}
+              scrollTime={currentTime}
             />
             </div>
           </div>
