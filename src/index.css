@@ -62,4 +62,34 @@
       background-color: #4a5568;
       color: #ffffff;
     }
+    .fc .fc-scroller {
+      overflow: visible !important;
+    }
+    
+    .fc .fc-scroller-liquid-absolute {
+      position: static !important;
+    }
+    .custom-scrollbar {
+      @apply overflow-hidden;
+    }
+  
+    .custom-scrollbar .fc-scroller {
+      overflow: auto !important;
+    }
+  
+    .custom-scrollbar .fc-scroller::-webkit-scrollbar {
+      @apply w-2;
+    }
+  
+    .custom-scrollbar .fc-scroller::-webkit-scrollbar-track {
+      @apply bg-gray-200 dark:bg-gray-700;
+    }
+  
+    .custom-scrollbar .fc-scroller::-webkit-scrollbar-thumb {
+      @apply bg-gray-400 dark:bg-gray-500 rounded-full;
+    }
+  
+    .custom-scrollbar .fc-scroller::-webkit-scrollbar-thumb:hover {
+      @apply bg-gray-500 dark:bg-gray-400;
+    }
   }

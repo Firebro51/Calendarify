@@ -5,6 +5,7 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import listPlugin from '@fullcalendar/list';
+import { Scrollbars } from 'react-custom-scrollbars-2';
 
 
 const tiers = [
@@ -281,36 +282,35 @@ function App() {
                 <button className="p-1" onClick={handleNext}><ChevronRight /></button>
               </div>
             </div>
-            <div className="flex-grow bg-gray-100 rounded-md overflow-hidden dark:bg-gray-600">
-            <FullCalendar
-              ref={calendarRef}
-              plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
-              initialView={view}
-              views={{
-                dayGridMonth: { buttonText: 'month' },
-                timeGridWeek: { buttonText: 'week' },
-                timeGridDay: { buttonText: 'day' },
-                dayGridYear: { buttonText: 'year', duration: { years: 1 } }
-              }}
-              height="100%"
-              headerToolbar={false}
-              dayMaxEvents={3}
-              allDaySlot={false}
-              nowIndicator={true}
-              eventContent={renderEventContent}
-              dayCellClassNames={`hover:bg-gray-200 transition-colors duration-200 ${darkMode ? 'dark:hover:bg-gray-500' : ''}`}
-              slotMinTime={'00:00:00'}
-              slotMaxTime={'24:00:00'}
-              scrollTime={currentTime}
-              editable={true}
-              selectable={true}
-              select={handleDateSelect}
-              events={events}
-              eventClick={handleEventClick}
-              eventDrop={handleEventDrop}
-              eventResize={handleEventResize}
-              
-            />
+            <div className="flex-grow bg-gray-100 rounded-md overflow-hidden dark:bg-gray-600 custom-scrollbar" style={{ height: 'calc(100vh - 200px)' }}>
+              <FullCalendar
+                ref={calendarRef}
+                plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
+                initialView={view}
+                views={{
+                  dayGridMonth: { buttonText: 'month' },
+                  timeGridWeek: { buttonText: 'week' },
+                  timeGridDay: { buttonText: 'day' },
+                  dayGridYear: { buttonText: 'year', duration: { years: 1 } }
+                }}
+                height="100%"
+                headerToolbar={false}
+                dayMaxEvents={3}
+                allDaySlot={false}
+                nowIndicator={true}
+                eventContent={renderEventContent}
+                dayCellClassNames={`hover:bg-gray-200 transition-colors duration-200 ${darkMode ? 'dark:hover:bg-gray-500' : ''}`}
+                slotMinTime={'00:00:00'}
+                slotMaxTime={'24:00:00'}
+                scrollTime={currentTime}
+                editable={true}
+                selectable={true}
+                select={handleDateSelect}
+                events={events}
+                eventClick={handleEventClick}
+                eventDrop={handleEventDrop}
+                eventResize={handleEventResize}
+              />
             </div>
           </div>
         </div>
