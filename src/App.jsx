@@ -5,7 +5,6 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import listPlugin from '@fullcalendar/list';
-import { Scrollbars } from 'react-custom-scrollbars-2';
 
 
 const tiers = [
