@@ -227,6 +227,15 @@ function App() {
     }
   }, [darkMode]);
 
+  useEffect(() => {
+    const root = document.getElementById('root');
+    if (darkMode) {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
+  }, [darkMode]);
+
   return (
     <div className="p-4 max-w-7xl mx-auto h-screen flex flex-col dark:bg-gray-800 dark:text-white">
       <div className="flex justify-between items-center mb-4">

@@ -2,6 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  #root.dark {
+    @apply bg-gray-800 text-white;
+  }
+}
+
+
 /* FullCalendar Tailwind Styles */
 @layer components {
     .fc {
@@ -34,5 +41,25 @@
   
     .fc .fc-daygrid-more-link {
       @apply text-xs text-blue-500;
+    }
+    .dark .fc {
+      color: #ffffff;
+    }
+    
+    .dark .fc .fc-daygrid-day-number {
+      color: #ffffff;
+    }
+    
+    .dark .fc .fc-col-header-cell-cushion {
+      color: #ffffff;
+    }
+    
+    .dark .fc .fc-daygrid-day.fc-day-today {
+      background-color: #2a4365;
+    }
+    
+    .dark .fc .fc-daygrid-event {
+      background-color: #4a5568;
+      color: #ffffff;
     }
   }
