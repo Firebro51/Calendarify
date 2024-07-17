@@ -281,7 +281,7 @@ function App() {
                 <button className="p-1" onClick={handleNext}><ChevronRight /></button>
               </div>
             </div>
-            <div className="flex-grow bg-gray-100 rounded-md overflow-hidden dark:bg-gray-600 custom-scrollbar" style={{ height: 'calc(100vh - 200px)' }}>
+            <div className="flex-grow bg-gray-100 rounded-md overflow-hidden dark:bg-gray-600 custom-scrollbar">
               <FullCalendar
                 ref={calendarRef}
                 plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
