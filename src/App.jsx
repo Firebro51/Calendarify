@@ -35,22 +35,22 @@ const stickers = [
 ];
 
 const eventColors = [
-  { name: 'Pastel Blue', value: '#A7C7E7' },
-  { name: 'Pastel Green', value: '#C1E1C1' },
-  { name: 'Pastel Pink', value: '#FFB3BA' },
-  { name: 'Pastel Yellow', value: '#FDFD96' },
-  { name: 'Pastel Lavender', value: '#E6E6FA' },
-  { name: 'Pastel Peach', value: '#FFDAB9' },
-  { name: 'Pastel Mint', value: '#98FF98' },
-  { name: 'Pastel Coral', value: '#FFB7B2' },
-  { name: 'Pastel Lilac', value: '#C8A2C8' },
-  { name: 'Pastel Lemon', value: '#FFFACD' },
-  { name: 'Pastel Periwinkle', value: '#CCCCFF' },
-  { name: 'Pastel Apricot', value: '#FFE5B4' },
-  { name: 'Pastel Aqua', value: '#E0FFFF' },
-  { name: 'Pastel Mauve', value: '#D8BFD8' },
-  { name: 'Pastel Sky Blue', value: '#87CEEB' },
-  { name: 'Pastel Rose', value: '#FFE4E1' },
+  { name: 'Soft Blue', value: '#A8DADC' },
+  { name: 'Sage Green', value: '#8FBC8F' },
+  { name: 'Dusty Rose', value: '#E5989B' },
+  { name: 'Muted Yellow', value: '#F4D35E' },
+  { name: 'Lavender', value: '#CDB4DB' },
+  { name: 'Peach', value: '#FFB4A2' },
+  { name: 'Mint', value: '#B5E2FA' },
+  { name: 'Mauve', value: '#C6A4A4' },
+  { name: 'Sky Blue', value: '#90C2E7' },
+  { name: 'Pale Pink', value: '#F5CAC3' },
+  { name: 'Light Teal', value: '#81B29A' },
+  { name: 'Apricot', value: '#FEC89A' },
+  { name: 'Periwinkle', value: '#9381FF' },
+  { name: 'Seafoam', value: '#97D8C4' },
+  { name: 'Lilac', value: '#B8B8FF' },
+  { name: 'Coral', value: '#F4A261' },
 ];
 
 
@@ -478,8 +478,15 @@ function App() {
 }
 
 function renderEventContent(eventInfo) {
+  const eventColor = eventColors.find(color => color.value === eventInfo.event.backgroundColor);
   return (
-    <div className="w-full h-full p-1 text-gray-800 dark:text-white" style={{backgroundColor: eventInfo.event.backgroundColor}}>
+    <div 
+      className="w-full h-full p-1" 
+      style={{
+        backgroundColor: eventInfo.event.backgroundColor,
+        color: eventColor ? eventColor.textColor : 'inherit'
+      }}
+    >
       {eventInfo.event.title}
     </div>
   )
