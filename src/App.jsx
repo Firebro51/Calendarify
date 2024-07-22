@@ -136,9 +136,12 @@ function App() {
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentTime(getCurrentTime());
-    }, 60000); // Update every minute, but it will only change on the hour
-
+      if (calendarRef.current) {
+        const calendarApi = calendarRef.current.getApi();
+        calendarApi.updateNowIndicator();
+      }
+    }, 60000); // Update every minute
+  
     return () => clearInterval(timer);
   }, []);
 
@@ -236,6 +239,33 @@ function App() {
     }
   }, [darkMode]);
 
+  const renderNowIndicator = (props) => {
+    return (
+      <div className="custom-now-indicator" style={{
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        top: props.top,
+        height: 0,
+        display: 'flex',
+        alignItems: 'center',
+        pointerEvents: 'none',
+        zIndex: 4
+      }}>
+        <div style={{
+          width: '12px',
+          height: '12px',
+          borderRadius: '50%',
+          backgroundColor: '#1E88E5',
+          marginLeft: '-6px',
+        }}></div>
+        <div style={{
+          borderTop: '2px solid #1E88E5',
+          flexGrow: 1,
+        }}></div>
+      </div>
+    );
+  };
   return (
     <div className="p-4 max-w-7xl mx-auto h-screen flex flex-col dark:bg-gray-800 dark:text-white">
       <div className="flex justify-between items-center mb-4">
@@ -297,6 +327,8 @@ function App() {
                 dayMaxEvents={3}
                 allDaySlot={false}
                 nowIndicator={true}
+                nowIndicatorClassNames="custom-now-indicator"
+                nowIndicatorContent={renderNowIndicator}
                 eventContent={renderEventContent}
                 dayCellClassNames={`hover:bg-gray-200 transition-colors duration-200 ${darkMode ? 'dark:hover:bg-gray-500' : ''}`}
                 slotMinTime={'00:00:00'}

@@ -93,3 +93,7 @@
       @apply bg-gray-500 dark:bg-gray-400;
     }
   }
+
+  .fc .fc-timegrid-now-indicator-arrow {
+    display: none !important;
+  }
