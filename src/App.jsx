@@ -185,6 +185,16 @@ function App() {
     setShowEventModal(true);
   };
 
+  const handleCalendarRightClick = (e) => {
+    e.preventDefault(); // Prevent the default context menu
+  };
+
+  const handleEventRightClick = (info, jsEvent) => {
+    jsEvent.preventDefault(); // Prevent the default context menu
+    jsEvent.stopPropagation(); // Stop the event from bubbling up
+    handleEventClick(info); // Reuse the existing click handler
+  };
+
   const handleEventDrop = (dropInfo) => {
     const updatedEvent = {
       id: dropInfo.event.id,
@@ -311,7 +321,9 @@ function App() {
                 <button className="p-1" onClick={handleNext}><ChevronRight /></button>
               </div>
             </div>
-            <div className="flex-grow bg-gray-100 rounded-md overflow-hidden dark:bg-gray-600 custom-scrollbar">
+            <div className="flex-grow bg-gray-100 rounded-md overflow-hidden dark:bg-gray-600 custom-scrollbar"
+                 onContextMenu={handleCalendarRightClick}
+            >
               <FullCalendar
                 ref={calendarRef}
                 plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
@@ -341,6 +353,9 @@ function App() {
                 eventClick={handleEventClick}
                 eventDrop={handleEventDrop}
                 eventResize={handleEventResize}
+                eventDidMount={(info) => {
+                  info.el.addEventListener('contextmenu', (e) => handleEventRightClick(info, e));
+                }}
               />
             </div>
           </div>
@@ -511,17 +526,36 @@ function App() {
 
 function renderEventContent(eventInfo) {
   const eventColor = eventColors.find(color => color.value === eventInfo.event.backgroundColor);
+  const textColor = getContrastColor(eventInfo.event.backgroundColor);
+  
   return (
     <div 
-      className="w-full h-full p-1" 
+      className="w-full h-full p-1 overflow-hidden"
       style={{
         backgroundColor: eventInfo.event.backgroundColor,
-        color: eventColor ? eventColor.textColor : 'inherit'
+        color: textColor,
       }}
     >
-      {eventInfo.event.title}
+      <div className="whitespace-nowrap overflow-hidden text-ellipsis">
+        {eventInfo.event.title}
+      </div>
     </div>
-  )
+  );
 }
+
+// Helper function to determine contrasting text color
+function getContrastColor(hexColor) {
+  // Convert hex to RGB
+  const r = parseInt(hexColor.slice(1, 3), 16);
+  const g = parseInt(hexColor.slice(3, 5), 16);
+  const b = parseInt(hexColor.slice(5, 7), 16);
+  
+  // Calculate luminance
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  
+  // Return black for light colors, white for dark colors
+  return luminance > 0.5 ? '#000000' : '#FFFFFF';
+}
+
 
 export default App;
