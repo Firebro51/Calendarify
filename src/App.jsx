@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect  } from 'react';
-import { ChevronLeft, ChevronRight, Award, TrendingUp, Sticker, Palette, X, Info, Moon, Sun, Plus } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Award, TrendingUp, Sticker, Palette, X, Info, Moon, Sun} from 'lucide-react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
@@ -71,11 +71,6 @@ function App() {
   const [currentEvent, setCurrentEvent] = useState({ id: '', title: '', start: '', end: '', color: eventColors[0].value });
   const [isEditMode, setIsEditMode] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
-  const [dailyChallenge, setDailyChallenge] = useState({ task: '', completed: false, points: 50 });
-  const [points, setPoints] = useState(0);
-  const [userChallenges, setUserChallenges] = useState([]);
-  const [showChallengeModal, setShowChallengeModal] = useState(false);
-  const [newChallenge, setNewChallenge] = useState({ task: '', points: 50 });
 
   const changeView = (newView) => {
     if (calendarRef.current) {
