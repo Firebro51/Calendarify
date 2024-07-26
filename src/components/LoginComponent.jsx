@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { LogIn, UserPlus, LogOut, User } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { LogIn, UserPlus, LogOut, User, ChevronDown } from 'lucide-react';
 
 function LoginComponent({ onAuthChange }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -8,19 +8,25 @@ function LoginComponent({ onAuthChange }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [userDisplayName, setUserDisplayName] = useState('');
+  const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+  const [dropdownWidth, setDropdownWidth] = useState(0);
+  
+  const dropdownRef = useRef(null);
+  const buttonRef = useRef(null);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log(`${authMode === 'login' ? 'Logging in' : 'Signing up'} with:`, { username, password });
     setIsAuthenticated(true);
     setShowAuthModal(false);
-    setUserDisplayName(username); // Set the display name to username
+    setUserDisplayName(username);
     onAuthChange(true);
   };
 
   const handleSignOut = () => {
     setIsAuthenticated(false);
     setUserDisplayName('');
+    setShowProfileDropdown(false);
     onAuthChange(false);
   };
 
@@ -28,17 +34,53 @@ function LoginComponent({ onAuthChange }) {
     setAuthMode(authMode === 'login' ? 'signup' : 'login');
   };
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowProfileDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (buttonRef.current) {
+      setDropdownWidth(buttonRef.current.offsetWidth);
+    }
+  }, [isAuthenticated]);
+
   if (isAuthenticated) {
     return (
-      <div className="flex items-center gap-2">
-        <span className="text-sm font-medium dark:text-gray-300">Welcome, {userDisplayName}!</span>
+      <div className="relative" ref={dropdownRef}>
         <button
-          className="px-4 py-2 bg-gray-200 text-black rounded hover:bg-gray-300 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600 flex items-center"
-          onClick={handleSignOut}
+          ref={buttonRef}
+          className="px-4 py-2 bg-gray-700 text-white rounded hover:bg-gray-600 flex items-center justify-between transition-colors"
+          onClick={() => setShowProfileDropdown(!showProfileDropdown)}
         >
-          <User className="mr-2 h-4 w-4" />
-          Sign Out
+          <div className="flex items-center">
+            <User className="mr-2 h-5 w-5" />
+            <span className="mr-2">{userDisplayName}</span>
+          </div>
+          <ChevronDown className="h-4 w-4" />
         </button>
+        {showProfileDropdown && (
+          <div 
+            className="absolute right-0 mt-2 bg-gray-800 rounded-md overflow-hidden shadow-xl z-10"
+            style={{ width: `${dropdownWidth}px` }}
+          >
+            <button
+              className="block w-full text-left px-4 py-2 text-sm text-white hover:bg-gray-700 transition-colors"
+              onClick={handleSignOut}
+            >
+              <LogOut className="inline-block mr-2 h-4 w-4" />
+              Sign Out
+            </button>
+          </div>
+        )}
       </div>
     );
   }
@@ -46,7 +88,7 @@ function LoginComponent({ onAuthChange }) {
   if (!showAuthModal) {
     return (
       <button
-        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 flex items-center transition duration-300"
+        className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 flex items-center transition-colors"
         onClick={() => setShowAuthModal(true)}
       >
         <LogIn className="mr-2" /> Login / Signup
@@ -56,13 +98,13 @@ function LoginComponent({ onAuthChange }) {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white p-8 rounded-lg max-w-md w-full shadow-lg dark:bg-gray-800">
-        <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">
+      <div className="bg-gray-800 p-8 rounded-lg max-w-md w-full shadow-lg">
+        <h2 className="text-2xl font-bold text-white mb-6">
           {authMode === 'login' ? 'Login' : 'Sign Up'}
         </h2>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label htmlFor="username" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label htmlFor="username" className="block text-sm font-medium text-gray-300 mb-1">
               Username
             </label>
             <input
@@ -71,11 +113,11 @@ function LoginComponent({ onAuthChange }) {
               placeholder="Enter your username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+              className="w-full p-3 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-700 text-white"
             />
           </div>
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-1">
               Password
             </label>
             <input
@@ -84,20 +126,20 @@ function LoginComponent({ onAuthChange }) {
               placeholder="Enter your password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+              className="w-full p-3 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-700 text-white"
             />
           </div>
           <div className="flex justify-between items-center">
             <button
               type="button"
               onClick={toggleAuthMode}
-              className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition duration-300"
+              className="text-sm text-blue-400 hover:text-blue-300 transition-colors"
             >
               {authMode === 'login' ? 'Need an account? Sign up' : 'Already have an account? Log in'}
             </button>
             <button
               type="submit"
-              className="px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 flex items-center transition duration-300"
+              className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 flex items-center transition-colors"
             >
               {authMode === 'login' ? <><LogIn className="mr-2" /> Login</> : <><UserPlus className="mr-2" /> Sign Up</>}
             </button>

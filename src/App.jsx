@@ -286,7 +286,7 @@ function App() {
   };
 
   return (
-    <div className="p-4 max-w-7xl mx-auto h-screen flex flex-col dark:bg-gray-800 dark:text-white">
+    <div className="p-4 w-full mx-auto h-screen flex flex-col dark:bg-gray-800 dark:text-white">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">Calendarify</h1>
         <div className="flex gap-2">
@@ -330,7 +330,7 @@ function App() {
     </div>
       
     <div className="flex gap-4 flex-grow">
-        <div className="flex-grow w-2/3">
+        <div className="flex-grow w-4/5">
           <div className="bg-white shadow rounded-lg p-4 h-full flex flex-col dark:bg-gray-700">
             <div className="flex justify-between items-center mb-2">
               <h2 className="text-lg font-semibold">
@@ -381,7 +381,7 @@ function App() {
           </div>
         </div>
         
-        <div className="w-1/3 flex flex-col gap-4">
+        <div className="w-1/5 flex flex-col gap-4">
           <div className="bg-white shadow rounded-lg p-4 flex-grow dark:bg-gray-700">
             <h2 className="text-lg font-semibold mb-2">User Progress</h2>
             <div className="flex items-center mb-2">
