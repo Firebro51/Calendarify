@@ -1,11 +1,12 @@
 import React, { useState, useRef, useEffect  } from 'react';
-import { ChevronLeft, ChevronRight, Award, TrendingUp, Sticker, Palette, X, Info, Moon, Sun} from 'lucide-react';
+import { ChevronLeft, ChevronRight, Award, TrendingUp, Sticker, Palette, X, Info, Moon, Sun, Check} from 'lucide-react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import listPlugin from '@fullcalendar/list';
 import LoginComponent from './components/LoginComponent';
+import Confetti from 'react-confetti';
 
 
 const tiers = [
@@ -73,6 +74,7 @@ function App() {
   const [isEditMode, setIsEditMode] = useState(false);
   const [darkMode, setDarkMode] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
   
 
   const changeView = (newView) => {
@@ -163,29 +165,42 @@ function App() {
 
   const handleEventAdd = () => {
     if (currentEvent.title) {
+      const newEvent = {
+        ...currentEvent,
+        extendedProps: { completed: false },
+      };
       if (isEditMode) {
         setEvents(events.map(event => 
-          event.id === currentEvent.id ? currentEvent : event
+          event.id === newEvent.id ? newEvent : event
         ));
       } else {
-        setEvents([...events, currentEvent]);
+        setEvents([...events, newEvent]);
       }
       setShowEventModal(false);
-      setCurrentEvent({ id: '', title: '', start: '', end: '', color: eventColors[0].value });
+      setCurrentEvent({ id: '', title: '', start: '', end: '', color: eventColors[0].value, extendedProps: { completed: false } });
       setIsEditMode(false);
     }
   };
-
+  
   const handleEventClick = (clickInfo) => {
     setCurrentEvent({
       id: clickInfo.event.id,
       title: clickInfo.event.title,
       start: clickInfo.event.startStr,
       end: clickInfo.event.endStr,
-      color: clickInfo.event.backgroundColor
+      color: clickInfo.event.backgroundColor,
+      extendedProps: clickInfo.event.extendedProps || { completed: false },
     });
     setIsEditMode(true);
     setShowEventModal(true);
+  };
+
+  const handleEventComplete = (eventId) => {
+    setEvents(events.map(event => 
+      event.id === eventId ? { ...event, extendedProps: { ...event.extendedProps, completed: true } } : event
+    ));
+    setShowConfetti(true);
+    setTimeout(() => setShowConfetti(false), 3000); // Hide confetti after 3 seconds
   };
 
   const handleCalendarRightClick = (e) => {
@@ -287,6 +302,7 @@ function App() {
 
   return (
     <div className="p-4 w-full mx-auto h-screen flex flex-col dark:bg-gray-800 dark:text-white">
+      {showConfetti && <Confetti />}
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">Calendarify</h1>
         <div className="flex gap-2">
@@ -544,13 +560,12 @@ function App() {
   );
 }
 
-function renderEventContent(eventInfo) {
-  const eventColor = eventColors.find(color => color.value === eventInfo.event.backgroundColor);
+const renderEventContent = (eventInfo) => {
   const textColor = getContrastColor(eventInfo.event.backgroundColor);
   
   return (
     <div 
-      className="w-full h-full p-1 overflow-hidden"
+      className="w-full h-full p-1 overflow-hidden relative group"
       style={{
         backgroundColor: eventInfo.event.backgroundColor,
         color: textColor,
@@ -559,9 +574,27 @@ function renderEventContent(eventInfo) {
       <div className="whitespace-nowrap overflow-hidden text-ellipsis">
         {eventInfo.event.title}
       </div>
+      {!eventInfo.event.extendedProps.completed && (
+        <div className="absolute top-0 right-0 hidden group-hover:block">
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              handleEventComplete(eventInfo.event.id);
+            }}
+            className="bg-green-500 text-white rounded-full p-1 hover:bg-green-600"
+          >
+            <Check size={12} />
+          </button>
+        </div>
+      )}
+      {eventInfo.event.extendedProps.completed && (
+        <div className="absolute top-0 right-0 bg-green-500 rounded-full p-1">
+          <Check size={12} color="white" />
+        </div>
+      )}
     </div>
   );
-}
+};
 
 // Helper function to determine contrasting text color
 function getContrastColor(hexColor) {
