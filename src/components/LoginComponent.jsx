@@ -1,22 +1,47 @@
 import React, { useState } from 'react';
-import { LogIn, UserPlus, LogOut, X } from 'lucide-react';
+import { LogIn, UserPlus, LogOut, User } from 'lucide-react';
 
 function LoginComponent({ onAuthChange }) {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState('login');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [userDisplayName, setUserDisplayName] = useState('');
 
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log(`${authMode === 'login' ? 'Logging in' : 'Signing up'} with:`, { username, password });
-    onAuthChange(true);
+    setIsAuthenticated(true);
     setShowAuthModal(false);
+    setUserDisplayName(username); // Set the display name to username
+    onAuthChange(true);
+  };
+
+  const handleSignOut = () => {
+    setIsAuthenticated(false);
+    setUserDisplayName('');
+    onAuthChange(false);
   };
 
   const toggleAuthMode = () => {
     setAuthMode(authMode === 'login' ? 'signup' : 'login');
   };
+
+  if (isAuthenticated) {
+    return (
+      <div className="flex items-center gap-2">
+        <span className="text-sm font-medium dark:text-gray-300">Welcome, {userDisplayName}!</span>
+        <button
+          className="px-4 py-2 bg-gray-200 text-black rounded hover:bg-gray-300 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600 flex items-center"
+          onClick={handleSignOut}
+        >
+          <User className="mr-2 h-4 w-4" />
+          Sign Out
+        </button>
+      </div>
+    );
+  }
 
   if (!showAuthModal) {
     return (
@@ -32,17 +57,9 @@ function LoginComponent({ onAuthChange }) {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white p-8 rounded-lg max-w-md w-full shadow-lg dark:bg-gray-800">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-800 dark:text-white">
-            {authMode === 'login' ? 'Login' : 'Sign Up'}
-          </h2>
-          <button
-            onClick={() => setShowAuthModal(false)}
-            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition duration-300"
-          >
-            <X size={24} />
-          </button>
-        </div>
+        <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">
+          {authMode === 'login' ? 'Login' : 'Sign Up'}
+        </h2>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label htmlFor="username" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
