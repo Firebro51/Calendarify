@@ -5,6 +5,7 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import listPlugin from '@fullcalendar/list';
+import LoginComponent from './components/LoginComponent';
 
 
 const tiers = [
@@ -71,6 +72,8 @@ function App() {
   const [currentEvent, setCurrentEvent] = useState({ id: '', title: '', start: '', end: '', color: eventColors[0].value });
   const [isEditMode, setIsEditMode] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  
 
   const changeView = (newView) => {
     if (calendarRef.current) {
@@ -281,15 +284,26 @@ function App() {
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">Calendarify</h1>
         <div className="flex gap-2">
+          <LoginComponent onAuthChange={setIsAuthenticated} />
           <button className="px-4 py-2 bg-gray-200 text-black rounded hover:bg-gray-300 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600" onClick={toggleDarkMode}>
             {darkMode ? <Sun className="inline-block" /> : <Moon className="inline-block" />}
           </button>
-          <button className="px-4 py-2 bg-gray-200 text-black rounded hover:bg-gray-300 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600" onClick={() => setShowAchievements(true)}>
-            <Award className="inline-block mr-2" /> Achievements
-          </button>
-          <button className="px-4 py-2 bg-gray-200 text-black rounded hover:bg-gray-300 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600" onClick={() => setShowStickers(true)}>
-            <Sticker className="inline-block mr-2" /> Stickers
-          </button>
+          {isAuthenticated && (
+             <>
+              <button 
+                className="px-4 py-2 bg-gray-200 text-black rounded hover:bg-gray-300 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600 flex items-center" 
+                onClick={() => setShowAchievements(true)}
+              >
+                <Award className="h-5 w-5 mr-2" /> Achievements
+              </button>
+              <button 
+                className="px-4 py-2 bg-gray-200 text-black rounded hover:bg-gray-300 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600 flex items-center" 
+                onClick={() => setShowStickers(true)}
+              >
+                <Sticker className="h-5 w-5 mr-2" /> Stickers
+              </button>
+            </>
+          )}
         </div>
       </div>
       
