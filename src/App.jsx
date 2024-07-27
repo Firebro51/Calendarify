@@ -75,6 +75,7 @@ function App() {
   const [darkMode, setDarkMode] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
+  const views = ['Month', 'Week', 'Day', 'Year'];
   
 
   const changeView = (newView) => {
@@ -328,22 +329,23 @@ function App() {
           )}
         </div>
       </div>
-      
+    
+
       <div className="flex gap-4 mb-4">
-      {['year', 'month', 'week', 'day'].map((v) => (
-        <button
-          key={v}
-          onClick={() => changeView(v)}
-          className={`px-4 py-2 rounded ${
-            view.toLowerCase().includes(v) 
-              ? 'bg-gray-300 text-black dark:bg-gray-600 dark:text-white' 
-              : 'bg-gray-200 text-black hover:bg-gray-300 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600'
-          }`}
-        >
-          {v.charAt(0).toUpperCase() + v.slice(1)}
-        </button>
-      ))}
-    </div>
+        {views.map((viewName) => (
+          <button
+            key={viewName}
+            onClick={() => changeView(viewName.toLowerCase())}
+            className={`px-4 py-2 rounded transition-colors ${
+              view.toLowerCase() === viewName.toLowerCase()
+                ? 'bg-blue-600 text-white dark:bg-blue-500'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600'
+            }`}
+          >
+            {viewName}
+          </button>
+        ))}
+      </div>
       
     <div className="flex gap-4 flex-grow">
         <div className="flex-grow w-4/5">

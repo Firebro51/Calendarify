@@ -92,6 +92,21 @@
     .custom-scrollbar .fc-scroller::-webkit-scrollbar-thumb:hover {
       @apply bg-gray-500 dark:bg-gray-400;
     }
+    .view-button {
+      @apply px-4 py-2 bg-gray-700 text-white rounded hover:bg-gray-600 transition-colors;
+    }
+  
+    .view-button.active {
+      @apply bg-gray-900;
+    }
+  
+    .dark .view-button {
+      @apply bg-gray-600 text-white hover:bg-gray-500;
+    }
+  
+    .dark .view-button.active {
+      @apply bg-gray-800;
+    }
   }
 
   .fc .fc-timegrid-now-indicator-arrow {
