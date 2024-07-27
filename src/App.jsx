@@ -70,12 +70,27 @@ function App() {
   const [currentTime, setCurrentTime] = useState(getCurrentTime());
   const [events, setEvents] = useState([]);
   const [showEventModal, setShowEventModal] = useState(false);
-  const [currentEvent, setCurrentEvent] = useState({ id: '', title: '', start: '', end: '', color: eventColors[0].value });
+  const [currentEvent, setCurrentEvent] = useState({
+    id: '',
+    title: '',
+    start: '',
+    end: '',
+    color: eventColors[0].value,
+    isRecurring: false,
+    recurringPattern: null,
+    extendedProps: { completed: false }
+  });
   const [isEditMode, setIsEditMode] = useState(false);
   const [darkMode, setDarkMode] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const views = ['Month', 'Week', 'Day', 'Year'];
+  const [inputErrors, setInputErrors] = useState({
+    title: '',
+    start: '',
+    end: '',
+    recurringPattern: '',
+  });
   
 
   const changeView = (newView) => {
@@ -152,23 +167,40 @@ function App() {
   }, []);
 
   const handleDateSelect = (selectInfo) => {
-    const id = Date.now().toString(); // Convert to string for consistency
+    const id = Date.now().toString();
+    const start = new Date(selectInfo.start);
+    const end = new Date(selectInfo.end);
     setCurrentEvent({
       id: id,
       title: '',
-      start: selectInfo.startStr,
-      end: selectInfo.endStr,
-      color: eventColors[0].value
+      start: start.toISOString().slice(0, 16), // format: "YYYY-MM-DDTHH:mm"
+      end: end.toISOString().slice(0, 16),
+      color: eventColors[0].value,
+      isRecurring: false,
+      recurringPattern: null,
+      extendedProps: { completed: false },
     });
     setIsEditMode(false);
     setShowEventModal(true);
   };
-
+  
   const handleEventAdd = () => {
-    if (currentEvent.title) {
+    if (isValidEvent(currentEvent)) {
       const newEvent = {
         ...currentEvent,
-        extendedProps: { completed: false },
+        start: new Date(currentEvent.start).toISOString(),
+        end: new Date(currentEvent.end).toISOString(),
+        extendedProps: { 
+          ...currentEvent.extendedProps,
+          completed: false,
+          isRecurring: currentEvent.isRecurring,
+          recurringPattern: currentEvent.isRecurring ? {
+            ...currentEvent.recurringPattern,
+            endDate: currentEvent.recurringPattern.endDate 
+              ? new Date(currentEvent.recurringPattern.endDate).toISOString()
+              : null
+          } : null
+        },
       };
       if (isEditMode) {
         setEvents(events.map(event => 
@@ -178,19 +210,86 @@ function App() {
         setEvents([...events, newEvent]);
       }
       setShowEventModal(false);
-      setCurrentEvent({ id: '', title: '', start: '', end: '', color: eventColors[0].value, extendedProps: { completed: false } });
+      resetCurrentEvent();
       setIsEditMode(false);
     }
   };
   
-  const handleEventClick = (clickInfo) => {
+  const resetCurrentEvent = () => {
     setCurrentEvent({
-      id: clickInfo.event.id,
+      id: '',
+      title: '',
+      start: '',
+      end: '',
+      color: eventColors[0].value,
+      isRecurring: false,
+      recurringPattern: null,
+      extendedProps: { completed: false },
+    });
+    setInputErrors({
+      title: '',
+      start: '',
+      end: '',
+      recurringPattern: '',
+    });
+  };
+  
+  const isValidEvent = (event) => {
+    const errors = {
+      title: '',
+      start: '',
+      end: '',
+      recurringPattern: '',
+    };
+  
+    if (!event.title.trim()) {
+      errors.title = 'Title is required';
+    }
+  
+    const startDate = new Date(event.start);
+    const endDate = new Date(event.end);
+  
+    if (isNaN(startDate.getTime())) {
+      errors.start = 'Invalid start date/time';
+    }
+  
+    if (isNaN(endDate.getTime())) {
+      errors.end = 'Invalid end date/time';
+    }
+  
+    if (startDate >= endDate) {
+      errors.end = 'End date/time must be after start date/time';
+    }
+  
+    if (event.isRecurring) {
+      if (!event.recurringPattern || !event.recurringPattern.frequency) {
+        errors.recurringPattern = 'Please select a frequency for recurring events';
+      }
+      if (event.recurringPattern?.frequency === 'weekly' && 
+          (!event.recurringPattern.daysOfWeek || event.recurringPattern.daysOfWeek.length === 0)) {
+        errors.recurringPattern = 'Please select at least one day of the week for weekly recurring events';
+      }
+    }
+  
+    setInputErrors(errors);
+    return Object.values(errors).every(error => error === '');
+  };
+  
+  const handleEventClick = (clickInfo) => {
+    const start = new Date(clickInfo.event.start);
+    const end = new Date(clickInfo.event.end);
+    setCurrentEvent({
+      id: clickInfo.event.extendedProps.originalEventId || clickInfo.event.id,
       title: clickInfo.event.title,
-      start: clickInfo.event.startStr,
-      end: clickInfo.event.endStr,
+      start: start.toISOString().slice(0, 16),
+      end: end.toISOString().slice(0, 16),
       color: clickInfo.event.backgroundColor,
-      extendedProps: clickInfo.event.extendedProps || { completed: false },
+      isRecurring: clickInfo.event.extendedProps.isRecurring || false,
+      recurringPattern: clickInfo.event.extendedProps.recurringPattern || null,
+      extendedProps: {
+        ...clickInfo.event.extendedProps,
+        originalEventId: clickInfo.event.extendedProps.originalEventId || clickInfo.event.id
+      },
     });
     setIsEditMode(true);
     setShowEventModal(true);
@@ -218,9 +317,12 @@ function App() {
     const updatedEvent = {
       id: dropInfo.event.id,
       title: dropInfo.event.title,
-      start: dropInfo.event.startStr,
-      end: dropInfo.event.endStr,
+      start: dropInfo.event.start.toISOString(),
+      end: dropInfo.event.end.toISOString(),
       color: dropInfo.event.backgroundColor,
+      isRecurring: dropInfo.event.extendedProps.isRecurring || false,
+      recurringPattern: dropInfo.event.extendedProps.recurringPattern || null,
+      extendedProps: dropInfo.event.extendedProps || { completed: false },
     };
     setEvents(events.map(event => 
       event.id === updatedEvent.id ? updatedEvent : event
@@ -231,9 +333,12 @@ function App() {
     const updatedEvent = {
       id: resizeInfo.event.id,
       title: resizeInfo.event.title,
-      start: resizeInfo.event.startStr,
-      end: resizeInfo.event.endStr,
+      start: resizeInfo.event.start.toISOString(),
+      end: resizeInfo.event.end.toISOString(),
       color: resizeInfo.event.backgroundColor,
+      isRecurring: resizeInfo.event.extendedProps.isRecurring || false,
+      recurringPattern: resizeInfo.event.extendedProps.recurringPattern || null,
+      extendedProps: resizeInfo.event.extendedProps || { completed: false },
     };
     setEvents(events.map(event => 
       event.id === updatedEvent.id ? updatedEvent : event
@@ -241,9 +346,15 @@ function App() {
   };
 
   const handleEventDelete = () => {
-    setEvents(events.filter(event => event.id !== currentEvent.id));
+    if (currentEvent.extendedProps.isRecurring) {
+      // For recurring events, delete all instances
+      setEvents(events.filter(event => event.id !== currentEvent.id && event.extendedProps.originalEventId !== currentEvent.id));
+    } else {
+      // For non-recurring events, delete the single event
+      setEvents(events.filter(event => event.id !== currentEvent.id));
+    }
     setShowEventModal(false);
-    setCurrentEvent({ id: '', title: '', start: '', end: '', color: eventColors[0].value });
+    resetCurrentEvent();
     setIsEditMode(false);
   };
 
@@ -299,6 +410,50 @@ function App() {
   const handleAuthChange = (authState) => {
     setIsAuthenticated(authState);
     // You might want to load user-specific data here when they log in
+  };
+
+  const expandRecurringEvents = (events, start, end) => {
+    return events.flatMap(event => {
+      if (!event.extendedProps.isRecurring) return [event];
+  
+      const { recurringPattern } = event.extendedProps;
+      const expandedEvents = [];
+      let currentDate = new Date(Math.max(new Date(event.start), start));
+      const endDate = new Date(end);
+  
+      while (currentDate <= endDate && (!recurringPattern.endDate || currentDate <= new Date(recurringPattern.endDate))) {
+        if (recurringPattern.frequency === 'daily' ||
+            (recurringPattern.frequency === 'weekly' && recurringPattern.daysOfWeek.includes(currentDate.getDay())) ||
+            (recurringPattern.frequency === 'monthly' && currentDate.getDate() === new Date(event.start).getDate()) ||
+            (recurringPattern.frequency === 'yearly' && 
+             currentDate.getMonth() === new Date(event.start).getMonth() && 
+             currentDate.getDate() === new Date(event.start).getDate())) {
+          
+          const eventStart = new Date(currentDate);
+          eventStart.setHours(new Date(event.start).getHours());
+          eventStart.setMinutes(new Date(event.start).getMinutes());
+          
+          const eventEnd = new Date(currentDate);
+          eventEnd.setHours(new Date(event.end).getHours());
+          eventEnd.setMinutes(new Date(event.end).getMinutes());
+          
+          expandedEvents.push({
+            ...event,
+            id: `${event.id}-${eventStart.toISOString()}`,
+            start: eventStart.toISOString(),
+            end: eventEnd.toISOString(),
+            extendedProps: {
+              ...event.extendedProps,
+              originalEventId: event.id,
+            },
+          });
+        }
+  
+        currentDate.setDate(currentDate.getDate() + 1);
+      }
+  
+      return expandedEvents;
+    });
   };
 
   return (
@@ -387,7 +542,10 @@ function App() {
                 editable={true}
                 selectable={true}
                 select={handleDateSelect}
-                events={events}
+                events={(fetchInfo, successCallback) => {
+                  const expandedEvents = expandRecurringEvents(events, fetchInfo.start, fetchInfo.end);
+                  successCallback(expandedEvents);
+                }}
                 eventClick={handleEventClick}
                 eventDrop={handleEventDrop}
                 eventResize={handleEventResize}
@@ -513,26 +671,133 @@ function App() {
 
       {showEventModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-4 rounded-lg max-w-md w-full dark:bg-gray-700">
-            <h2 className="text-xl font-bold mb-4 dark:text-white">{isEditMode ? 'Edit Event' : 'Add New Event'}</h2>
-            <input
-              type="text"
-              placeholder="Event Title"
-              value={currentEvent.title}
-              onChange={(e) => setCurrentEvent({...currentEvent, title: e.target.value})}
-              className="w-full p-2 mb-4 border rounded dark:bg-gray-600 dark:text-white dark:border-gray-500"
-            />
+          <div className="bg-gray-800 p-6 rounded-lg max-w-md w-full">
+            <h2 className="text-xl font-bold mb-4 text-white">{isEditMode ? 'Edit Event' : 'Add New Event'}</h2>
+            
+            <div className="mb-4">
+              <input
+                type="text"
+                placeholder="Event Title"
+                value={currentEvent.title}
+                onChange={(e) => setCurrentEvent({...currentEvent, title: e.target.value})}
+                className={`w-full p-2 border rounded bg-gray-700 text-white border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                  inputErrors.title ? 'border-red-500' : ''
+                }`}
+              />
+              {inputErrors.title && <p className="text-red-500 text-sm mt-1">{inputErrors.title}</p>}
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-300 mb-1">Start</label>
+              <input
+                type="datetime-local"
+                value={currentEvent.start}
+                onChange={(e) => setCurrentEvent({...currentEvent, start: e.target.value})}
+                className={`w-full p-2 border rounded bg-gray-700 text-white border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                  inputErrors.start ? 'border-red-500' : ''
+                }`}
+              />
+              {inputErrors.start && <p className="text-red-500 text-sm mt-1">{inputErrors.start}</p>}
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-300 mb-1">End</label>
+              <input
+                type="datetime-local"
+                value={currentEvent.end}
+                onChange={(e) => setCurrentEvent({...currentEvent, end: e.target.value})}
+                className={`w-full p-2 border rounded bg-gray-700 text-white border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                  inputErrors.end ? 'border-red-500' : ''
+                }`}
+              />
+              {inputErrors.end && <p className="text-red-500 text-sm mt-1">{inputErrors.end}</p>}
+            </div>
+
+            <div className="mb-4">
+              <label className="flex items-center">
+                <input
+                  type="checkbox"
+                  checked={currentEvent.isRecurring}
+                  onChange={(e) => setCurrentEvent({...currentEvent, isRecurring: e.target.checked})}
+                  className="mr-2"
+                />
+                <span className="text-sm font-medium text-gray-300">Recurring Event</span>
+              </label>
+            </div>
+
+            {currentEvent.isRecurring && (
+              <div className="mb-4">
+                <select
+                  value={currentEvent.recurringPattern?.frequency || ''}
+                  onChange={(e) => setCurrentEvent({
+                    ...currentEvent, 
+                    recurringPattern: {...(currentEvent.recurringPattern || {}), frequency: e.target.value}
+                  })}
+                  className={`w-full p-2 border rounded bg-gray-700 text-white border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                    inputErrors.recurringPattern ? 'border-red-500' : ''
+                  }`}
+                >
+                  <option value="">Select frequency</option>
+                  <option value="daily">Daily</option>
+                  <option value="weekly">Weekly</option>
+                  <option value="monthly">Monthly</option>
+                  <option value="yearly">Yearly</option>
+                </select>
+
+                {currentEvent.recurringPattern?.frequency === 'weekly' && (
+                  <div className="mt-2 flex flex-wrap">
+                    {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, index) => (
+                      <label key={day} className="inline-flex items-center mr-2 mb-2">
+                        <input
+                          type="checkbox"
+                          checked={currentEvent.recurringPattern?.daysOfWeek?.includes(index) || false}
+                          onChange={() => {
+                            const daysOfWeek = currentEvent.recurringPattern?.daysOfWeek || [];
+                            const updatedDays = daysOfWeek.includes(index)
+                              ? daysOfWeek.filter(d => d !== index)
+                              : [...daysOfWeek, index];
+                            setCurrentEvent({
+                              ...currentEvent,
+                              recurringPattern: {...(currentEvent.recurringPattern || {}), daysOfWeek: updatedDays}
+                            });
+                          }}
+                          className="mr-1"
+                        />
+                        <span className="text-sm text-gray-300">{day}</span>
+                      </label>
+                    ))}
+                  </div>
+                )}
+
+                <div className="mt-2">
+                  <label className="block text-sm font-medium text-gray-300 mb-1">End Date (optional)</label>
+                  <input
+                    type="date"
+                    value={currentEvent.recurringPattern?.endDate || ''}
+                    onChange={(e) => setCurrentEvent({
+                      ...currentEvent,
+                      recurringPattern: {...(currentEvent.recurringPattern || {}), endDate: e.target.value}
+                    })}
+                    className="w-full p-2 border rounded bg-gray-700 text-white border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                
+                {inputErrors.recurringPattern && <p className="text-red-500 text-sm mt-1">{inputErrors.recurringPattern}</p>}
+              </div>
+            )}
+
             <div className="grid grid-cols-8 gap-2 mb-4">
               {eventColors.map(color => (
                 <button
                   key={color.name}
                   onClick={() => setCurrentEvent({...currentEvent, color: color.value})}
-                  className={`w-6 h-6 rounded-full ${currentEvent.color === color.value ? 'ring-2 ring-offset-2 ring-black dark:ring-white' : ''}`}
+                  className={`w-6 h-6 rounded-full ${currentEvent.color === color.value ? 'ring-2 ring-offset-2 ring-white' : ''}`}
                   style={{backgroundColor: color.value}}
                   title={color.name}
                 ></button>
               ))}
             </div>
+
             <div className="flex justify-end">
               {isEditMode && (
                 <button 
@@ -543,8 +808,11 @@ function App() {
                 </button>
               )}
               <button 
-                onClick={() => setShowEventModal(false)}
-                className="px-4 py-2 bg-gray-200 text-black rounded hover:bg-gray-300 mr-2 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500"
+                onClick={() => {
+                  setShowEventModal(false);
+                  resetCurrentEvent();
+                }}
+                className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-500 mr-2"
               >
                 Cancel
               </button>
