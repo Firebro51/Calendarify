@@ -306,7 +306,7 @@ function App() {
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">Calendarify</h1>
         <div className="flex gap-2">
-          <LoginComponent onAuthChange={handleAuthChange} />
+          <LoginComponent onAuthChange={handleAuthChange} darkMode={darkMode} />
           <button className="px-4 py-2 bg-gray-200 text-black rounded hover:bg-gray-300 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600" onClick={toggleDarkMode}>
             {darkMode ? <Sun className="inline-block" /> : <Moon className="inline-block" />}
           </button>
