@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { LogIn, UserPlus, LogOut, User, ChevronDown } from 'lucide-react';
+import { LogIn, UserPlus, LogOut, User, ChevronDown, X, AlertCircle } from 'lucide-react';
 
 function LoginComponent({ onAuthChange }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -10,6 +10,7 @@ function LoginComponent({ onAuthChange }) {
   const [userDisplayName, setUserDisplayName] = useState('');
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [dropdownWidth, setDropdownWidth] = useState(0);
+  const [showSignOutConfirmation, setShowSignOutConfirmation] = useState(false);
   
   const dropdownRef = useRef(null);
   const buttonRef = useRef(null);
@@ -24,14 +25,27 @@ function LoginComponent({ onAuthChange }) {
   };
 
   const handleSignOut = () => {
+    setShowSignOutConfirmation(true);
+  };
+
+  const confirmSignOut = () => {
     setIsAuthenticated(false);
     setUserDisplayName('');
     setShowProfileDropdown(false);
+    setShowSignOutConfirmation(false);
     onAuthChange(false);
+  };
+
+  const cancelSignOut = () => {
+    setShowSignOutConfirmation(false);
   };
 
   const toggleAuthMode = () => {
     setAuthMode(authMode === 'login' ? 'signup' : 'login');
+  };
+
+  const handleCloseModal = () => {
+    setShowAuthModal(false);
   };
 
   useEffect(() => {
@@ -81,6 +95,31 @@ function LoginComponent({ onAuthChange }) {
             </button>
           </div>
         )}
+        {showSignOutConfirmation && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-gray-800 p-6 rounded-lg max-w-sm w-full shadow-lg">
+              <div className="flex items-center mb-4">
+                <AlertCircle className="text-yellow-500 mr-2" size={24} />
+                <h3 className="text-lg font-semibold text-white">Confirm Sign Out</h3>
+              </div>
+              <p className="text-gray-300 mb-6">Are you sure you want to sign out?</p>
+              <div className="flex justify-end space-x-4">
+                <button
+                  onClick={cancelSignOut}
+                  className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-500 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmSignOut}
+                  className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+                >
+                  Sign Out
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
@@ -98,7 +137,14 @@ function LoginComponent({ onAuthChange }) {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-gray-800 p-8 rounded-lg max-w-md w-full shadow-lg">
+      <div className="bg-gray-800 p-8 rounded-lg max-w-md w-full shadow-lg relative">
+        <button 
+          onClick={handleCloseModal}
+          className="absolute top-2 right-2 text-gray-400 hover:text-white transition-colors"
+          aria-label="Close"
+        >
+          <X size={24} />
+        </button>
         <h2 className="text-2xl font-bold text-white mb-6">
           {authMode === 'login' ? 'Login' : 'Sign Up'}
         </h2>
