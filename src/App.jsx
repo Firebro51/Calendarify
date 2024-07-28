@@ -91,8 +91,8 @@ function App() {
     end: '',
     recurringPattern: '',
   });
-  
 
+  
   const changeView = (newView) => {
     if (calendarRef.current) {
       const calendarApi = calendarRef.current.getApi();
@@ -168,13 +168,19 @@ function App() {
 
   const handleDateSelect = (selectInfo) => {
     const id = Date.now().toString();
-    const start = new Date(selectInfo.start);
-    const end = new Date(selectInfo.end);
+    const start = selectInfo.start;
+    const end = selectInfo.end;
+
+    // Adjust for all-day events
+    if (selectInfo.allDay) {
+      end.setDate(end.getDate() - 1);
+    }
+
     setCurrentEvent({
       id: id,
       title: '',
-      start: start.toISOString().slice(0, 16), // format: "YYYY-MM-DDTHH:mm"
-      end: end.toISOString().slice(0, 16),
+      start: formatDateTimeLocal(start),
+      end: formatDateTimeLocal(end),
       color: eventColors[0].value,
       isRecurring: false,
       recurringPattern: null,
@@ -182,6 +188,12 @@ function App() {
     });
     setIsEditMode(false);
     setShowEventModal(true);
+  };
+
+  const formatDateTimeLocal = (date) => {
+    const offset = date.getTimezoneOffset();
+    const adjustedDate = new Date(date.getTime() - offset * 60 * 1000);
+    return adjustedDate.toISOString().slice(0, 16);
   };
   
   const handleEventAdd = () => {
@@ -261,13 +273,49 @@ function App() {
       errors.end = 'End date/time must be after start date/time';
     }
   
+    const durationInHours = (endDate - startDate) / (1000 * 60 * 60);
+    if (durationInHours > 24) {
+      errors.end = 'Event duration cannot exceed 24 hours';
+    }
+  
     if (event.isRecurring) {
       if (!event.recurringPattern || !event.recurringPattern.frequency) {
         errors.recurringPattern = 'Please select a frequency for recurring events';
+      } else {
+        switch (event.recurringPattern.frequency) {
+          case 'daily':
+            if (durationInHours > 24) {
+              errors.recurringPattern = 'Daily recurring events cannot span more than 24 hours';
+            }
+            break;
+          case 'weekly':
+            if (!event.recurringPattern.daysOfWeek || event.recurringPattern.daysOfWeek.length === 0) {
+              errors.recurringPattern = 'Please select at least one day of the week for weekly recurring events';
+            }
+            if (durationInHours > 24) {
+              errors.recurringPattern = 'Weekly recurring events cannot span more than 24 hours';
+            }
+            break;
+          case 'monthly':
+            if (durationInHours > 24) {
+              errors.recurringPattern = 'Monthly recurring events cannot span more than 24 hours';
+            }
+            break;
+          case 'yearly':
+            if (durationInHours > 24) {
+              errors.recurringPattern = 'Yearly recurring events cannot span more than 24 hours';
+            }
+            break;
+        }
       }
-      if (event.recurringPattern?.frequency === 'weekly' && 
-          (!event.recurringPattern.daysOfWeek || event.recurringPattern.daysOfWeek.length === 0)) {
-        errors.recurringPattern = 'Please select at least one day of the week for weekly recurring events';
+
+      if (event.recurringPattern.endDate) {
+        const endRecurringDate = new Date(event.recurringPattern.endDate);
+        if (isNaN(endRecurringDate.getTime())) {
+          errors.recurringPattern = 'Invalid end date for recurring pattern';
+        } else if (endRecurringDate < startDate) {
+          errors.recurringPattern = 'Recurring end date must be after the event start date';
+        }
       }
     }
   
@@ -276,13 +324,14 @@ function App() {
   };
   
   const handleEventClick = (clickInfo) => {
-    const start = new Date(clickInfo.event.start);
-    const end = new Date(clickInfo.event.end);
+    const start = clickInfo.event.start;
+    const end = clickInfo.event.end || new Date(start.getTime() + 60 * 60 * 1000); // Default to 1 hour if no end time
+
     setCurrentEvent({
       id: clickInfo.event.extendedProps.originalEventId || clickInfo.event.id,
       title: clickInfo.event.title,
-      start: start.toISOString().slice(0, 16),
-      end: end.toISOString().slice(0, 16),
+      start: formatDateTimeLocal(start),
+      end: formatDateTimeLocal(end),
       color: clickInfo.event.backgroundColor,
       isRecurring: clickInfo.event.extendedProps.isRecurring || false,
       recurringPattern: clickInfo.event.extendedProps.recurringPattern || null,
@@ -420,28 +469,28 @@ function App() {
       const expandedEvents = [];
       let currentDate = new Date(Math.max(new Date(event.start), start));
       const endDate = new Date(end);
+      const eventStart = new Date(event.start);
+      const eventEnd = new Date(event.end);
+      const duration = eventEnd - eventStart;
   
       while (currentDate <= endDate && (!recurringPattern.endDate || currentDate <= new Date(recurringPattern.endDate))) {
         if (recurringPattern.frequency === 'daily' ||
             (recurringPattern.frequency === 'weekly' && recurringPattern.daysOfWeek.includes(currentDate.getDay())) ||
-            (recurringPattern.frequency === 'monthly' && currentDate.getDate() === new Date(event.start).getDate()) ||
+            (recurringPattern.frequency === 'monthly' && currentDate.getDate() === eventStart.getDate()) ||
             (recurringPattern.frequency === 'yearly' && 
-             currentDate.getMonth() === new Date(event.start).getMonth() && 
-             currentDate.getDate() === new Date(event.start).getDate())) {
+             currentDate.getMonth() === eventStart.getMonth() && 
+             currentDate.getDate() === eventStart.getDate())) {
           
-          const eventStart = new Date(currentDate);
-          eventStart.setHours(new Date(event.start).getHours());
-          eventStart.setMinutes(new Date(event.start).getMinutes());
+          const instanceStart = new Date(currentDate);
+          instanceStart.setHours(eventStart.getHours(), eventStart.getMinutes(), eventStart.getSeconds());
           
-          const eventEnd = new Date(currentDate);
-          eventEnd.setHours(new Date(event.end).getHours());
-          eventEnd.setMinutes(new Date(event.end).getMinutes());
+          const instanceEnd = new Date(instanceStart.getTime() + duration);
           
           expandedEvents.push({
             ...event,
-            id: `${event.id}-${eventStart.toISOString()}`,
-            start: eventStart.toISOString(),
-            end: eventEnd.toISOString(),
+            id: `${event.id}-${instanceStart.toISOString()}`,
+            start: instanceStart.toISOString(),
+            end: instanceEnd.toISOString(),
             extendedProps: {
               ...event.extendedProps,
               originalEventId: event.id,
