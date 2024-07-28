@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect  } from 'react';
-import { ChevronLeft, ChevronRight, Award, TrendingUp, Sticker, Palette, X, Info, Moon, Sun, Check} from 'lucide-react';
+import { ChevronLeft, ChevronRight, Award, TrendingUp, Sticker, Palette, X, Info, Moon, Sun, Check, Calendar} from 'lucide-react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
@@ -135,6 +135,14 @@ function App() {
       calendarApi.next();
     }
   };
+
+  const handleToday = () => {
+    if (calendarRef.current) {
+      const calendarApi = calendarRef.current.getApi();
+      calendarApi.today();
+    }
+  };
+
 
   const calculateLevelProgress = () => {
     return (daysUsed % 10) * 10; // Progress resets every 10 days
@@ -559,8 +567,15 @@ function App() {
                 {view.replace('dayGrid', '')} View
               </h2>
               <div className="flex items-center space-x-2">
-                <button className="p-1" onClick={handlePrev}><ChevronLeft /></button>
-                <button className="p-1" onClick={handleNext}><ChevronRight /></button>
+                <button className="p-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500" onClick={handlePrev}><ChevronLeft size={20} /></button>
+                <button 
+                  className="px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 flex items-center"
+                  onClick={handleToday}
+                >
+                  <Calendar className="h-4 w-4 mr-1" />
+                  Today
+                </button>
+                <button className="p-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500" onClick={handleNext}><ChevronRight size={20} /></button>
               </div>
             </div>
             <div className="flex-grow bg-gray-100 rounded-md overflow-hidden dark:bg-gray-600 custom-scrollbar"
