@@ -562,20 +562,32 @@ function App() {
     <div className="flex gap-4 flex-grow">
         <div className="flex-grow w-4/5">
           <div className="bg-white shadow rounded-lg p-4 h-full flex flex-col dark:bg-gray-700">
-            <div className="flex justify-between items-center mb-2">
+            <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg font-semibold">
                 {view.replace('dayGrid', '')} View
               </h2>
               <div className="flex items-center space-x-2">
-                <button className="p-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500" onClick={handlePrev}><ChevronLeft size={20} /></button>
                 <button 
-                  className="px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 flex items-center"
+                  className="p-2 bg-gray-100 text-gray-600 rounded-full hover:bg-gray-200 transition-colors duration-200 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500"
+                  onClick={handlePrev}
+                  aria-label="Previous"
+                >
+                  <ChevronLeft size={20} />
+                </button>
+                <button 
+                  className="px-4 py-2 bg-sky-400 text-white rounded-md hover:bg-sky-500 transition-colors duration-200 flex items-center justify-center"
                   onClick={handleToday}
                 >
-                  <Calendar className="h-4 w-4 mr-1" />
+                  <Calendar className="h-4 w-4 mr-2" />
                   Today
                 </button>
-                <button className="p-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500" onClick={handleNext}><ChevronRight size={20} /></button>
+                <button
+                  className="p-2 bg-gray-100 text-gray-600 rounded-full hover:bg-gray-200 transition-colors duration-200 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500"
+                  onClick={handleNext}
+                  aria-label="Next"
+                >
+                  <ChevronRight size={20} />
+                </button>
               </div>
             </div>
             <div className="flex-grow bg-gray-100 rounded-md overflow-hidden dark:bg-gray-600 custom-scrollbar"
