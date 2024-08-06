@@ -352,12 +352,24 @@ function App() {
     setShowEventModal(true);
   };
 
-  const handleEventComplete = (eventId) => {
-    setEvents(events.map(event => 
-      event.id === eventId ? { ...event, extendedProps: { ...event.extendedProps, completed: true } } : event
-    ));
-    setShowConfetti(true);
-    setTimeout(() => setShowConfetti(false), 3000); // Hide confetti after 3 seconds
+  const handleEventComplete = (eventId, isCompleted) => {
+    setEvents(events.map(event => {
+      if (event.id === eventId || event.extendedProps.originalEventId === eventId) {
+        return { 
+          ...event, 
+          extendedProps: { 
+            ...event.extendedProps, 
+            completed: !isCompleted 
+          } 
+        };
+      }
+      return event;
+    }));
+    
+    if (!isCompleted) {
+      setShowConfetti(true);
+      setTimeout(() => setShowConfetti(false), 3000); // Hide confetti after 3 seconds
+    }
   };
 
   const handleCalendarRightClick = (e) => {
@@ -502,6 +514,7 @@ function App() {
             extendedProps: {
               ...event.extendedProps,
               originalEventId: event.id,
+              completed: event.extendedProps.completed
             },
           });
         }
@@ -610,7 +623,7 @@ function App() {
                 nowIndicator={true}
                 nowIndicatorClassNames="custom-now-indicator"
                 nowIndicatorContent={renderNowIndicator}
-                eventContent={renderEventContent}
+                eventContent={(eventInfo) => renderEventContent(eventInfo, handleEventComplete)}
                 dayCellClassNames={`hover:bg-gray-200 transition-colors duration-200 ${darkMode ? 'dark:hover:bg-gray-500' : ''}`}
                 slotMinTime={'00:00:00'}
                 slotMaxTime={'24:00:00'}
@@ -906,38 +919,35 @@ function App() {
   );
 }
 
-const renderEventContent = (eventInfo) => {
+const renderEventContent = (eventInfo, onComplete) => {
   const textColor = getContrastColor(eventInfo.event.backgroundColor);
-  
+  const isCompleted = eventInfo.event.extendedProps.completed;
+  const eventId = eventInfo.event.extendedProps.originalEventId || eventInfo.event.id;
+
   return (
     <div 
-      className="w-full h-full p-1 overflow-hidden relative group"
+      className="w-full h-full p-1 overflow-hidden relative flex items-center"
       style={{
         backgroundColor: eventInfo.event.backgroundColor,
         color: textColor,
       }}
     >
-      <div className="whitespace-nowrap overflow-hidden text-ellipsis">
+      <div className="flex-grow whitespace-nowrap overflow-hidden text-ellipsis">
         {eventInfo.event.title}
       </div>
-      {!eventInfo.event.extendedProps.completed && (
-        <div className="absolute top-0 right-0 hidden group-hover:block">
-          <button 
-            onClick={(e) => {
-              e.stopPropagation();
-              handleEventComplete(eventInfo.event.id);
-            }}
-            className="bg-green-500 text-white rounded-full p-1 hover:bg-green-600"
-          >
-            <Check size={12} />
-          </button>
-        </div>
-      )}
-      {eventInfo.event.extendedProps.completed && (
-        <div className="absolute top-0 right-0 bg-green-500 rounded-full p-1">
-          <Check size={12} color="white" />
-        </div>
-      )}
+      <button 
+        onClick={(e) => {
+          e.stopPropagation();
+          onComplete(eventId, isCompleted);
+        }}
+        className={`ml-1 p-1 rounded-full transition-colors duration-200 ${
+          isCompleted 
+            ? 'bg-green-500 text-white hover:bg-green-600' 
+            : 'bg-gray-300 text-gray-600 hover:bg-gray-400 dark:bg-gray-600 dark:text-gray-300 dark:hover:bg-gray-500'
+        }`}
+      >
+        <Check size={12} />
+      </button>
     </div>
   );
 };
