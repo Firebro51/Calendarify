@@ -1,6 +1,7 @@
 # Calendarify
 
-A gamified calendar application with event management and task tracking. Users can create recurring events and mark tasks complete. Built with React, FullCalendar, and modern web technologies.
+A gamified calendar application with event management and task tracking. Users can create recurring events and mark tasks complete. Built with React, FullCalendar, Tailwind CSS, and Vite.
+
 ## Features
 
 - **Multi-view Calendar**: Month, week, day, and year views with seamless navigation
